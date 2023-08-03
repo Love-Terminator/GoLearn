@@ -64,4 +64,6 @@ func main() {
 	slice6 = append(slice6[:1], slice6[2:]...)
 	fmt.Println(slice6)
 	fmt.Println(arr5)
+
+	fmt.Println("Test")
 }
