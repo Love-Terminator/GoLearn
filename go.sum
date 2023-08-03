@@ -1,0 +1,4 @@
+github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
+github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
+gopkg.in/bufio.v1 v1.0.0-20140618132640-567b2bfa514e h1:wGA78yza6bu/mWcc4QfBuIEHEtc06xdiU0X8sY36yUU=
+gopkg.in/bufio.v1 v1.0.0-20140618132640-567b2bfa514e/go.mod h1:xsQCaysVCudhrYTfzYWe577fCe7Ceci+6qjO2Rdc0Z4=
