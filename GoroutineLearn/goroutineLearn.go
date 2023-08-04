@@ -66,38 +66,40 @@ func main() {
 	var animal2 Animal
 	animal2 = &Dog{name: "dog", age: 2, sex: "male"}
 
+	// 无缓存，同步通信，双向信道
 	ch := make(chan string)
 	exit := make(chan string)
 
-	go animalCat(animal1, ch)
-	go animalDog(animal2, ch, exit)
+	go animalCat(animal1, ch, exit)
+	go animalDog(animal2, ch)
 
+	// 用于阻塞主线程，使得协程能够运行。当协程运行完毕，close(exit)，协程输出数据，主线程结束
 	<-exit
 
 }
 
-func animalCat(animal1 Animal, ch chan string) {
+func animalCat(animal1 Animal, ch chan string, exit chan string) {
 	for {
 		if v, ok := <-ch; ok {
 			fmt.Println("Cat: " + v)
 			ch <- animal1.info()
 		} else {
+			defer close(exit)
 			fmt.Println("Cat: Bye!")
 			return
 		}
 	}
 }
 
-func animalDog(animal2 Animal, ch chan string, exit chan string) {
+func animalDog(animal2 Animal, ch chan string) {
 	ch <- animal2.info()
 	for {
 		if v, ok := <-ch; ok {
 			fmt.Println("Dog: " + v)
 			time.Sleep(10 * time.Second)
+			fmt.Println("Dog: Bye!")
 			close(ch)
 		} else {
-			defer close(exit)
-			fmt.Println("Dog: Bye!")
 			return
 		}
 	}
