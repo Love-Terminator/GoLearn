@@ -39,6 +39,7 @@ func SetupConfig() {
 
 func AdminHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "我是Admin")
+	fmt.Println(r.Context())
 	// acl := new(Acl)
 	// fmt.Println(*acl)
 }
