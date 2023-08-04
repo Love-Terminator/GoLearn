@@ -2,21 +2,32 @@ package main
 
 import (
 	"fmt"
-	"runtime"
 )
 
-func main() {
-	//var x int
-	threads := runtime.GOMAXPROCS(0)
-	fmt.Println(threads)
-	/*
-		for i := 0; i < threads; i++ {
-			go func() {
-				for { x++ }
-			}()
-		}
-		time.Sleep(time.Second)
-		fmt.Println("x =", x)
+type feature interface {
+	sound(name string)
+}
 
-	*/
+type Cat struct {
+	name string
+	age  int
+	sex  string
+}
+
+type Dog struct {
+	name string
+	age  int
+	sex  string
+}
+
+func (cat *Cat) sound() {
+	fmt.Printf("Hello, I am %s, Miao~~~", cat.name)
+}
+
+func (dog *Dog) sound() {
+	fmt.Printf("Hello, I am %s, Wang~~~", dog.name)
+}
+
+func main() {
+
 }
