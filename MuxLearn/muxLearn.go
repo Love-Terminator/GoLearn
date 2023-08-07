@@ -1,7 +1,35 @@
 package main
 
-func main() {
+import (
+	"fmt"
+	"github.com/gorilla/mux"
+	"net/http"
+)
 
+// MuxDemo4。中间件测试
+func main() {
+	remote := mux.NewRouter()
+
+	remote.HandleFunc("/middle", handler)
+	remote.Use(loggingMiddleware)
+
+	http.ListenAndServe(":8080", remote)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//Do stuff here
+		fmt.Println(r.RequestURI)
+		fmt.Fprintf(w, "%s\r\n", r.URL)
+		fmt.Println(r.Header)
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(w, r)
+	})
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("handle middleware"))
+	fmt.Println("print handler")
 }
 
 /*
