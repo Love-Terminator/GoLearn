@@ -4,8 +4,98 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	"sync"
 )
 
+// muxDemo5。中间件进阶测试。中间件CommonHeaderHandler和LogHeaderHandler会被串起来。在执行Helloworld之前执行
+type HandlerFunc func(http.Handler) http.Handler
+
+type commonHeaderHandler struct {
+	handler http.Handler
+}
+
+func (h commonHeaderHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write([]byte("我是commonHeaderHandler"))
+	w.Header().Set("commonHeader", "common")
+	fmt.Println(w.Header())
+	if err != nil {
+		return
+	}
+	h.handler.ServeHTTP(w, r)
+}
+
+func SetCommonHeaderHandler(h http.Handler) http.Handler {
+	return commonHeaderHandler{h}
+}
+
+type logHeaderHandler struct {
+	handler http.Handler
+}
+
+func (h logHeaderHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write([]byte("我是logHeaderHandler"))
+	w.Header().Set("logHeader", "log")
+	fmt.Println(w.Header())
+	if err != nil {
+		return
+	}
+	h.handler.ServeHTTP(w, r)
+}
+
+func setLogHeaderHandler(h http.Handler) http.Handler {
+	return logHeaderHandler{h}
+}
+
+func RegisterHandlers(router *mux.Router, handlerFns ...HandlerFunc) http.Handler {
+	var f http.Handler
+	f = router
+	for _, hFn := range handlerFns {
+		f = hFn(f)
+	}
+	return f
+}
+
+func HelloWorld(w http.ResponseWriter, r *http.Request) {
+	_, err := fmt.Fprintf(w, "Hello world")
+	fmt.Println(w.Header())
+	if err != nil {
+		return
+	}
+}
+
+func main() {
+	remote := mux.NewRouter().PathPrefix("/api").Subrouter()
+
+	remote.Methods("GET").HandlerFunc(HelloWorld)
+
+	middlewares := []HandlerFunc{
+		SetCommonHeaderHandler,
+		setLogHeaderHandler,
+	}
+
+	server := &http.Server{
+		Addr:    ":8081",
+		Handler: RegisterHandlers(remote, middlewares...),
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			err := server.ListenAndServe()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		}
+	}()
+
+	wg.Wait()
+
+}
+
+/*
 // MuxDemo4。中间件测试
 func main() {
 	remote := mux.NewRouter()
@@ -41,6 +131,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+*/
 
 /*
 // MuxDemo3。设置子路由、匹配前缀、域名
