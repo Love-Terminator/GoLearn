@@ -71,11 +71,12 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
 var log = logrus.New()
 
 func initLog(log *logrus.Logger) (*logrus.Logger, error) {
-	file, err := os.OpenFile("./log/remote.log", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0777)
+	file, err := os.OpenFile("./log/remote.json", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0777)
 	if err != nil {
 		return &logrus.Logger{}, err
 	}
 	log.Out = file
+	log.Formatter = &logrus.JSONFormatter{}
 	return log, nil
 }
 
@@ -83,6 +84,7 @@ func main() {
 	_, err := initLog(log)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	remote := mux.NewRouter().PathPrefix("/api").Subrouter()
