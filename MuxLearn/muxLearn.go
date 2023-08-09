@@ -12,6 +12,7 @@ func main() {
 
 	remote.HandleFunc("/middle", handler)
 	remote.Use(loggingMiddleware)
+	remote.Use(HeaderMiddleware)
 
 	http.ListenAndServe(":8080", remote)
 }
@@ -19,17 +20,26 @@ func main() {
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//Do stuff here
-		fmt.Println(r.RequestURI)
-		fmt.Fprintf(w, "%s\r\n", r.URL)
-		fmt.Println(r.Header)
+		fmt.Fprintln(w, "我是LoggingMiddleware")
+		//fmt.Fprintf(w, "%s\r\n", r.URL)
+		//fmt.Println(r.Header)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
 	})
 }
 
+func HeaderMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "我是HeaderMiddleware")
+		next.ServeHTTP(w, r)
+	})
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("handle middleware"))
-	fmt.Println("print handler")
+	_, err := w.Write([]byte("我是最终的Handler"))
+	if err != nil {
+		return
+	}
 }
 
 /*
