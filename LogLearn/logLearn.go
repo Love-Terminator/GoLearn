@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 	"sync"
 )
 
@@ -19,9 +21,10 @@ func (h commonHeaderHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("commonHeader", "common")
 	fmt.Println(w.Header())
 	if err != nil {
-		return
+		log.Error(err)
 	}
 	h.handler.ServeHTTP(w, r)
+	log.Info("我是commonHeaderHandler")
 }
 
 func SetCommonHeaderHandler(h http.Handler) http.Handler {
@@ -37,9 +40,10 @@ func (h logHeaderHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("logHeader", "log")
 	fmt.Println(w.Header())
 	if err != nil {
-		return
+		log.Error(err)
 	}
 	h.handler.ServeHTTP(w, r)
+	log.Info("我是logHeaderHandler")
 }
 
 func setLogHeaderHandler(h http.Handler) http.Handler {
@@ -60,11 +64,27 @@ func HelloWorld(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(w.Header())
 	fmt.Println(r.URL.Path)
 	if err != nil {
-		return
+		log.Error(err)
 	}
 }
 
+var log = logrus.New()
+
+func initLog(log *logrus.Logger) (*logrus.Logger, error) {
+	file, err := os.OpenFile("./log/remote.log", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0777)
+	if err != nil {
+		return &logrus.Logger{}, err
+	}
+	log.Out = file
+	return log, nil
+}
+
 func main() {
+	_, err := initLog(log)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	remote := mux.NewRouter().PathPrefix("/api").Subrouter()
 
 	remote.Host("s3.test.com").Methods("GET").Path("/hello").HandlerFunc(HelloWorld)
@@ -75,7 +95,7 @@ func main() {
 	}
 
 	server := &http.Server{
-		Addr:    ":8081",
+		Addr:    ":8082",
 		Handler: RegisterHandlers(remote, middlewares...),
 	}
 
@@ -86,7 +106,7 @@ func main() {
 		for {
 			err := server.ListenAndServe()
 			if err != nil {
-				fmt.Println(err)
+				log.Error(err)
 				return
 			}
 		}
