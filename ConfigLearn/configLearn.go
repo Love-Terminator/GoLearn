@@ -29,8 +29,8 @@ type YigStorage struct {
 func RegisterAPIRouter(router *mux.Router, api ObjectAPIHandlers) {
 	// API Router
 	// 设置路径前缀和子路由
-	apiRouter := router.PathPrefix("/").Subrouter()
-	apiRouter.Methods("get").HandlerFunc(api.ObjectAPI.MakeBucket())
+	//apiRouter := router.PathPrefix("/").Subrouter()
+	//apiRouter.Methods("get").HandlerFunc(api.ObjectAPI.MakeBucket())
 }
 
 type ServerConfig struct {

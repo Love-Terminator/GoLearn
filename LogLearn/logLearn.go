@@ -17,9 +17,9 @@ type commonHeaderHandler struct {
 }
 
 func (h commonHeaderHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("我是commonHeaderHandler"))
+	_, err := w.Write([]byte("我是commonHeaderHandler\n"))
 	w.Header().Set("commonHeader", "common")
-	fmt.Println(w.Header())
+	// fmt.Println(w.Header())
 	if err != nil {
 		log.Error(err)
 	}
@@ -36,9 +36,9 @@ type logHeaderHandler struct {
 }
 
 func (h logHeaderHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("我是logHeaderHandler"))
+	_, err := w.Write([]byte("我是logHeaderHandler\n"))
 	w.Header().Set("logHeader", "log")
-	fmt.Println(w.Header())
+	// fmt.Println(w.Header())
 	if err != nil {
 		log.Error(err)
 	}
@@ -61,8 +61,10 @@ func RegisterHandlers(router *mux.Router, handlerFns ...HandlerFunc) http.Handle
 
 func HelloWorld(w http.ResponseWriter, r *http.Request) {
 	_, err := fmt.Fprintf(w, "Hello world")
-	fmt.Println(w.Header())
+	// fmt.Println(w.Header())
 	fmt.Println(r.URL.Path)
+	fmt.Println(r.Header)
+	fmt.Println(r.Method)
 	if err != nil {
 		log.Error(err)
 	}
@@ -90,6 +92,7 @@ func main() {
 	remote := mux.NewRouter().PathPrefix("/api").Subrouter()
 
 	remote.Host("s3.test.com").Methods("GET").Path("/hello").HandlerFunc(HelloWorld)
+	remote.Host("s3.test.com").Methods("PUT").Path("/hello").HandlerFunc(HelloWorld)
 
 	middlewares := []HandlerFunc{
 		SetCommonHeaderHandler,
