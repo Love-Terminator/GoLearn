@@ -79,28 +79,24 @@ func formData(w http.ResponseWriter, r *http.Request) {
 	// 获取file类型的参数
 	picFiles := params.File
 	fmt.Fprintln(w, picFiles)
-	for fileName, _ := range picFiles {
-		file, fileHeader, err := r.FormFile(fileName)
-		fmt.Fprintln(w, file)
-		fmt.Fprintln(w, fileHeader)
-		if err != nil {
-			log.Fatalln("文件上传有误")
-			return
-		}
+	for _, files := range picFiles {
+		for i := 0; i < len(files); i++ {
+			fileHeader, _ := files[i].Open()
 
-		fileBuffer := make([]byte, fileHeader.Size)
-		_, err = file.Read(fileBuffer)
-		if err != nil {
-			log.Fatalln("读取文件数据有误")
-			return
-		}
+			fileBuffer := make([]byte, files[i].Size)
+			_, err := fileHeader.Read(fileBuffer)
+			if err != nil {
+				log.Fatalln("读取文件数据有误")
+				return
+			}
 
-		copyFile, _ := os.OpenFile("./copyFile/"+fileHeader.Filename, os.O_CREATE|os.O_RDWR, 0777)
-		_, err = copyFile.Write(fileBuffer)
-		if err != nil {
-			log.Fatalln()
-			return
+			copyFile, _ := os.OpenFile("./copyFile/"+files[i].Filename, os.O_CREATE|os.O_RDWR, 0777)
+			_, err = copyFile.Write(fileBuffer)
+			if err != nil {
+				log.Fatalln()
+				return
+			}
+			defer copyFile.Close()
 		}
-		defer copyFile.Close()
 	}
 }
