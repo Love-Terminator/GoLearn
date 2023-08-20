@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"gopkg.in/bufio.v1"
 	"log"
 	"net/http"
 	"os"
@@ -20,6 +21,7 @@ func main() {
 	testRouter := router.Host("s3.test.com").PathPrefix("/").Subrouter()
 	testRouter.Methods("POST").Path("/form").HandlerFunc(xWwwFormUrlencoded)
 	testRouter.Methods("POST").Path("/formdata").HandlerFunc(formData)
+	testRouter.Methods("POST").Path("/formstream").HandlerFunc(OctetStream)
 
 	server := &http.Server{
 		Addr:    ":8100",
@@ -99,4 +101,14 @@ func formData(w http.ResponseWriter, r *http.Request) {
 			defer copyFile.Close()
 		}
 	}
+}
+
+func OctetStream(w http.ResponseWriter, r *http.Request) {
+	stream := make(byte[])
+	reader := bufio.NewReader(r.Body)
+	reader.Read()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(buf) // 二进制数据
 }
