@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"gopkg.in/bufio.v1"
 	"log"
 	"net/http"
 	"os"
@@ -67,6 +66,23 @@ func xWwwFormUrlencoded(w http.ResponseWriter, r *http.Request) {
 // 然后是空行，最后是参数内容。多个参数将会有多个boundary块。如果参数是文件会有特别的文件域。最后以------boundary–为结束标识。
 // multipart/form-data支持文件上传的格式，一般需要上传文件的表单则用该类型。
 func formData(w http.ResponseWriter, r *http.Request) {
+
+	/*
+		// 一、解析request
+		log.Printf("Get %s request. host: %s\n", r.Method, r.Host)
+		// 获取body的长度
+		contentLen := r.ContentLength
+		rtype := r.Header.Get("Content-Type")
+		// 定义字节切片
+		content := make([]byte, contentLen)
+		// 获取request body
+		r.Body.Read(content)
+		fmt.Fprintln(w, "request-type: "+rtype)
+		fmt.Fprintln(w, "request-lenght: "+strconv.FormatInt(contentLen, 10))
+		fmt.Fprintln(w, "body: "+string(content))
+
+	*/
+
 	// 一、解析body为map类型。针对multipart/form-data类型
 	r.ParseMultipartForm(128)
 	params := r.MultipartForm
@@ -104,11 +120,18 @@ func formData(w http.ResponseWriter, r *http.Request) {
 }
 
 func OctetStream(w http.ResponseWriter, r *http.Request) {
-	stream := make(byte[])
-	reader := bufio.NewReader(r.Body)
-	reader.Read()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(buf) // 二进制数据
+	/*
+		stream := make([]byte, r.ContentLength)
+		reader := bufio.NewReader(r.Body)
+		_, err := reader.Read(stream)
+		if err != nil {
+			return
+		}
+		fmt.Fprintln(w, stream) // 二进制数据
+
+	*/
+
+	buff := make([]byte, r.ContentLength)
+	r.Body.Read(buff)
+	fmt.Fprintln(w, buff)
 }
